@@ -16,10 +16,10 @@ var getCmd = &cobra.Command{
 	Long: `Get detailed information for a track, album, artist, or playlist by its ID.
 	
 Examples:
-  deezer get track 3135556
-  deezer get album 302127 --output json
-  deezer get artist 27 --ids-only
-  deezer get playlist 908622995`,
+  deezer-cli get track 3135556
+  deezer-cli get album 302127 --output json
+  deezer-cli get artist 27 --ids-only
+  deezer-cli get playlist 908622995`,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		itemType := args[0]
@@ -54,9 +54,9 @@ var tracksCmd = &cobra.Command{
 	Long: `Get track listings for albums or top tracks for artists.
 	
 Examples:
-  deezer tracks album 302127
-  deezer tracks artist 27 --limit 10
-  deezer tracks album 302127 --output json --limit 5`,
+  deezer-cli tracks album 302127
+  deezer-cli tracks artist 27 --limit 10
+  deezer-cli tracks album 302127 --output json --limit 5`,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		itemType := args[0]
@@ -87,12 +87,12 @@ var albumsCmd = &cobra.Command{
 	Long: `Get all albums for a specific artist.
 	
 Examples:
-  deezer albums artist 27
-  deezer albums artist 27 --limit 10 --output json`,
+  deezer-cli albums artist 27
+  deezer-cli albums artist 27 --limit 10 --output json`,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if args[0] != "artist" {
-			fmt.Fprintf(os.Stderr, "Use: deezer albums artist [id]\n")
+			fmt.Fprintf(os.Stderr, "Use: deezer-cli albums artist [id]\n")
 			os.Exit(1)
 		}
 

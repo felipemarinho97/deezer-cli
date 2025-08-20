@@ -16,11 +16,11 @@ These flags are available for all commands:
 
 ## Commands
 
-### deezer search
+### deezer-cli search
 
 Search the Deezer catalog for music content.
 
-**Usage:** `deezer search [query] [flags]`
+**Usage:** `deezer-cli search [query] [flags]`
 
 **Arguments:**
 - `query` (required): Search term
@@ -40,16 +40,16 @@ Search the Deezer catalog for music content.
 
 **Examples:**
 ```bash
-deezer search "daft punk" --type artist
-deezer search "get lucky" --artist "daft punk" --exact
-deezer search "chill" --type playlist --output json
+deezer-cli search "daft punk" --type artist
+deezer-cli search "get lucky" --artist "daft punk" --exact
+deezer-cli search "chill" --type playlist --output json
 ```
 
-### deezer get
+### deezer-cli get
 
 Get detailed information for a specific item by ID.
 
-**Usage:** `deezer get [type] [id] [flags]`
+**Usage:** `deezer-cli get [type] [id] [flags]`
 
 **Arguments:**
 - `type` (required): Item type: track, album, artist, playlist
@@ -62,16 +62,16 @@ Get detailed information for a specific item by ID.
 
 **Examples:**
 ```bash
-deezer get track 3135556
-deezer get album 302127 --output json
-deezer get artist 27 --ids-only
+deezer-cli get track 3135556
+deezer-cli get album 302127 --output json
+deezer-cli get artist 27 --ids-only
 ```
 
-### deezer tracks
+### deezer-cli tracks
 
 Get track listings for albums or top tracks for artists.
 
-**Usage:** `deezer tracks [type] [id] [flags]`
+**Usage:** `deezer-cli tracks [type] [id] [flags]`
 
 **Arguments:**
 - `type` (required): Item type: album, artist
@@ -84,16 +84,16 @@ Get track listings for albums or top tracks for artists.
 
 **Examples:**
 ```bash
-deezer tracks album 302127
-deezer tracks artist 27 --limit 10
-deezer tracks album 302127 --output json --limit 5
+deezer-cli tracks album 302127
+deezer-cli tracks artist 27 --limit 10
+deezer-cli tracks album 302127 --output json --limit 5
 ```
 
-### deezer albums
+### deezer-cli albums
 
 Get albums for an artist.
 
-**Usage:** `deezer albums artist [id] [flags]`
+**Usage:** `deezer-cli albums artist [id] [flags]`
 
 **Arguments:**
 - Must use `artist` as the type (only supported type)
@@ -106,8 +106,8 @@ Get albums for an artist.
 
 **Examples:**
 ```bash
-deezer albums artist 27
-deezer albums artist 27 --limit 10 --output json
+deezer-cli albums artist 27
+deezer-cli albums artist 27 --limit 10 --output json
 ```
 
 ## Output Formats
@@ -238,13 +238,13 @@ deezer albums artist 27 --limit 10 --output json
 ### Shell Scripting
 ```bash
 # Get all track IDs from an album
-TRACK_IDS=$(deezer tracks album 302127 --ids-only)
+TRACK_IDS=$(deezer-cli tracks album 302127 --ids-only)
 
 # Search and pipe to file
-deezer search "jazz" --type playlist --output csv > jazz_playlists.csv
+deezer-cli search "jazz" --type playlist --output csv > jazz_playlists.csv
 
 # Check if track exists
-if deezer get track 12345 --ids-only >/dev/null 2>&1; then
+if deezer-cli get track 12345 --ids-only >/dev/null 2>&1; then
     echo "Track exists"
 fi
 ```
@@ -252,20 +252,20 @@ fi
 ### Data Processing
 ```bash
 # Convert to different formats
-deezer search "rock" --type artist --output json | jq '.[].name'
+deezer-cli search "rock" --type artist --output json | jq '.[].name'
 
 # Count results
-deezer search "pop" --limit 100 --ids-only | wc -l
+deezer-cli search "pop" --limit 100 --ids-only | wc -l
 
 # Extract specific fields
-deezer get artist 27 --output json | jq '.name, .nb_fan'
+deezer-cli get artist 27 --output json | jq '.name, .nb_fan'
 ```
 
 ### API Integration
 ```bash
 # Build API request URLs
 BASE_URL="https://api.deezer.com"
-TRACK_ID=$(deezer search "bohemian rhapsody" --type track --limit 1 --ids-only)
+TRACK_ID=$(deezer-cli search "bohemian rhapsody" --type track --limit 1 --ids-only)
 curl "${BASE_URL}/track/${TRACK_ID}"
 ```
 
@@ -274,7 +274,7 @@ curl "${BASE_URL}/track/${TRACK_ID}"
 ### Common Issues
 
 1. **Command not found**
-   - Ensure binary is built: `go build -o deezer .`
+   - Ensure binary is built: `go build -o deezer-cli .`
    - Check executable permissions: `chmod +x deezer`
 
 2. **No results found**

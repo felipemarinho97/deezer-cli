@@ -23,11 +23,11 @@ var searchCmd = &cobra.Command{
 	Long: `Search the Deezer catalog for music content.
 	
 Examples:
-  deezer search "daft punk" --type track
-  deezer search "random access memories" --type album --limit 5
-  deezer search "get lucky" --artist "daft punk" --exact
-  deezer search "chill" --type playlist --output json
-  deezer search "madonna" --type artist --ids-only`,
+  deezer-cli search "daft punk" --type track
+  deezer-cli search "random access memories" --type album --limit 5
+  deezer-cli search "get lucky" --artist "daft punk" --exact
+  deezer-cli search "chill" --type playlist --output json
+  deezer-cli search "madonna" --type artist --ids-only`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		query := args[0]
@@ -65,11 +65,11 @@ func searchTracks(client *api.Client, query string, formatter *output.Formatter)
 	}
 
 	tracks := result.Data
-	
+
 	if artistFilter != "" {
 		tracks = api.FilterByArtist(tracks, artistFilter)
 	}
-	
+
 	if albumFilter != "" {
 		tracks = filterTracksByAlbum(tracks, albumFilter)
 	}
@@ -85,7 +85,7 @@ func searchAlbums(client *api.Client, query string, formatter *output.Formatter)
 	}
 
 	albums := result.Data
-	
+
 	if artistFilter != "" {
 		albums = api.FilterAlbumsByArtist(albums, artistFilter)
 	}
@@ -116,13 +116,13 @@ func searchPlaylists(client *api.Client, query string, formatter *output.Formatt
 func searchAll(client *api.Client, query string, formatter *output.Formatter) {
 	fmt.Println("=== TRACKS ===")
 	searchTracks(client, query, formatter)
-	
+
 	fmt.Println("\n=== ALBUMS ===")
 	searchAlbums(client, query, formatter)
-	
+
 	fmt.Println("\n=== ARTISTS ===")
 	searchArtists(client, query, formatter)
-	
+
 	fmt.Println("\n=== PLAYLISTS ===")
 	searchPlaylists(client, query, formatter)
 }
@@ -134,7 +134,7 @@ func filterTracksByAlbum(tracks []api.Track, albumName string) []api.Track {
 
 	var filtered []api.Track
 	lowerAlbum := strings.ToLower(albumName)
-	
+
 	for _, track := range tracks {
 		if exact {
 			if strings.ToLower(track.Album.Title) == lowerAlbum {
@@ -146,6 +146,6 @@ func filterTracksByAlbum(tracks []api.Track, albumName string) []api.Track {
 			}
 		}
 	}
-	
+
 	return filtered
 }
