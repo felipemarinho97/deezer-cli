@@ -238,13 +238,13 @@ deezer albums artist 27 --limit 10 --output json
 ### Shell Scripting
 ```bash
 # Get all track IDs from an album
-TRACK_IDS=$(./deezer tracks album 302127 --ids-only)
+TRACK_IDS=$(deezer tracks album 302127 --ids-only)
 
 # Search and pipe to file
-./deezer search "jazz" --type playlist --output csv > jazz_playlists.csv
+deezer search "jazz" --type playlist --output csv > jazz_playlists.csv
 
 # Check if track exists
-if ./deezer get track 12345 --ids-only >/dev/null 2>&1; then
+if deezer get track 12345 --ids-only >/dev/null 2>&1; then
     echo "Track exists"
 fi
 ```
@@ -252,20 +252,20 @@ fi
 ### Data Processing
 ```bash
 # Convert to different formats
-./deezer search "rock" --type artist --output json | jq '.[].name'
+deezer search "rock" --type artist --output json | jq '.[].name'
 
 # Count results
-./deezer search "pop" --limit 100 --ids-only | wc -l
+deezer search "pop" --limit 100 --ids-only | wc -l
 
 # Extract specific fields
-./deezer get artist 27 --output json | jq '.name, .nb_fan'
+deezer get artist 27 --output json | jq '.name, .nb_fan'
 ```
 
 ### API Integration
 ```bash
 # Build API request URLs
 BASE_URL="https://api.deezer.com"
-TRACK_ID=$(./deezer search "bohemian rhapsody" --type track --limit 1 --ids-only)
+TRACK_ID=$(deezer search "bohemian rhapsody" --type track --limit 1 --ids-only)
 curl "${BASE_URL}/track/${TRACK_ID}"
 ```
 
