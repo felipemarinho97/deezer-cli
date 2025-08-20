@@ -126,14 +126,11 @@ func (f *Formatter) outputTracksTable(tracks []api.Track) {
 	table.SetCenterSeparator("│")
 	table.SetColumnSeparator("│")
 	table.SetRowSeparator("─")
-	table.SetHeaderColor(
-		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
-		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
-		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
-		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
-		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
-		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
-	)
+	headerColors := make([]tablewriter.Colors, len(headers))
+	for i := range headerColors {
+		headerColors[i] = tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor}
+	}
+	table.SetHeaderColor(headerColors...)
 
 	for _, track := range tracks {
 		row := []string{
