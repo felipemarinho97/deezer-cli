@@ -6,85 +6,85 @@ import (
 )
 
 type Track struct {
-	ID                   int64   `json:"id"`
-	Title                string  `json:"title"`
-	TitleShort          string  `json:"title_short"`
-	TitleVersion        string  `json:"title_version"`
-	Link                string  `json:"link"`
-	Duration            int     `json:"duration"`
-	Rank                int     `json:"rank"`
-	ExplicitLyrics      bool    `json:"explicit_lyrics"`
-	Preview             string  `json:"preview"`
-	BPM                 float64 `json:"bpm"`
-	Gain                float64 `json:"gain"`
-	Artist              Artist  `json:"artist"`
-	Album               Album   `json:"album"`
-	Type                string  `json:"type"`
+	ID             int64   `json:"id"`
+	Title          string  `json:"title"`
+	TitleShort     string  `json:"title_short"`
+	TitleVersion   string  `json:"title_version"`
+	Link           string  `json:"link"`
+	Duration       int     `json:"duration"`
+	Rank           int     `json:"rank"`
+	ExplicitLyrics bool    `json:"explicit_lyrics"`
+	Preview        string  `json:"preview"`
+	BPM            float64 `json:"bpm"`
+	Gain           float64 `json:"gain"`
+	Artist         Artist  `json:"artist"`
+	Album          Album   `json:"album"`
+	Type           string  `json:"type"`
 }
 
 type Album struct {
-	ID                   int64   `json:"id"`
-	Title                string  `json:"title"`
-	Link                string  `json:"link"`
-	Cover               string  `json:"cover"`
-	CoverSmall          string  `json:"cover_small"`
-	CoverMedium         string  `json:"cover_medium"`
-	CoverBig            string  `json:"cover_big"`
-	CoverXL             string  `json:"cover_xl"`
-	GenreID             int     `json:"genre_id"`
-	NbTracks            int     `json:"nb_tracks"`
-	ReleaseDate         string  `json:"release_date"`
-	RecordType          string  `json:"record_type"`
-	Tracklist           string  `json:"tracklist"`
-	ExplicitLyrics      bool    `json:"explicit_lyrics"`
-	Artist              Artist  `json:"artist"`
-	Type                string  `json:"type"`
+	ID             int64  `json:"id"`
+	Title          string `json:"title"`
+	Link           string `json:"link"`
+	Cover          string `json:"cover"`
+	CoverSmall     string `json:"cover_small"`
+	CoverMedium    string `json:"cover_medium"`
+	CoverBig       string `json:"cover_big"`
+	CoverXL        string `json:"cover_xl"`
+	GenreID        int    `json:"genre_id"`
+	NbTracks       int    `json:"nb_tracks"`
+	ReleaseDate    string `json:"release_date"`
+	RecordType     string `json:"record_type"`
+	Tracklist      string `json:"tracklist"`
+	ExplicitLyrics bool   `json:"explicit_lyrics"`
+	Artist         Artist `json:"artist"`
+	Type           string `json:"type"`
 }
 
 type Artist struct {
-	ID               int64  `json:"id"`
-	Name             string `json:"name"`
-	Link             string `json:"link"`
-	Picture          string `json:"picture"`
-	PictureSmall     string `json:"picture_small"`
-	PictureMedium    string `json:"picture_medium"`
-	PictureBig       string `json:"picture_big"`
-	PictureXL        string `json:"picture_xl"`
-	NbAlbum          int    `json:"nb_album"`
-	NbFan            int    `json:"nb_fan"`
-	Radio            bool   `json:"radio"`
-	Tracklist        string `json:"tracklist"`
-	Type             string `json:"type"`
+	ID            int64  `json:"id"`
+	Name          string `json:"name"`
+	Link          string `json:"link"`
+	Picture       string `json:"picture"`
+	PictureSmall  string `json:"picture_small"`
+	PictureMedium string `json:"picture_medium"`
+	PictureBig    string `json:"picture_big"`
+	PictureXL     string `json:"picture_xl"`
+	NbAlbum       int    `json:"nb_album"`
+	NbFan         int    `json:"nb_fan"`
+	Radio         bool   `json:"radio"`
+	Tracklist     string `json:"tracklist"`
+	Type          string `json:"type"`
 }
 
 type Playlist struct {
-	ID               int64         `json:"id"`
-	Title            string        `json:"title"`
-	Description      string        `json:"description"`
-	Duration         int           `json:"duration"`
-	Public           bool          `json:"public"`
-	IsLovedTrack     bool          `json:"is_loved_track"`
-	Collaborative    bool          `json:"collaborative"`
-	NbTracks         int           `json:"nb_tracks"`
-	Fans             int           `json:"fans"`
-	Link             string        `json:"link"`
-	Picture          string        `json:"picture"`
-	PictureSmall     string        `json:"picture_small"`
-	PictureMedium    string        `json:"picture_medium"`
-	PictureBig       string        `json:"picture_big"`
-	PictureXL        string        `json:"picture_xl"`
-	Checksum         string        `json:"checksum"`
-	Creator          *User         `json:"creator"`
-	Tracks           *TracksData   `json:"tracks"`
-	Type             string        `json:"type"`
-	CreationDate     string        `json:"creation_date"`
+	ID            int64       `json:"id"`
+	Title         string      `json:"title"`
+	Description   string      `json:"description"`
+	Duration      int         `json:"duration"`
+	Public        bool        `json:"public"`
+	IsLovedTrack  bool        `json:"is_loved_track"`
+	Collaborative bool        `json:"collaborative"`
+	NbTracks      int         `json:"nb_tracks"`
+	Fans          int         `json:"fans"`
+	Link          string      `json:"link"`
+	Picture       string      `json:"picture"`
+	PictureSmall  string      `json:"picture_small"`
+	PictureMedium string      `json:"picture_medium"`
+	PictureBig    string      `json:"picture_big"`
+	PictureXL     string      `json:"picture_xl"`
+	Checksum      string      `json:"checksum"`
+	Creator       *User       `json:"creator"`
+	Tracks        *TracksData `json:"tracks"`
+	Type          string      `json:"type"`
+	CreationDate  string      `json:"creation_date"`
 }
 
 type User struct {
-	ID               int64  `json:"id"`
-	Name             string `json:"name"`
-	Tracklist        string `json:"tracklist"`
-	Type             string `json:"type"`
+	ID        int64  `json:"id"`
+	Name      string `json:"name"`
+	Tracklist string `json:"tracklist"`
+	Type      string `json:"type"`
 }
 
 type TracksData struct {
@@ -125,6 +125,56 @@ type AlbumsResult struct {
 	Data  []Album `json:"data"`
 	Total int     `json:"total"`
 	Next  string  `json:"next"`
+}
+
+type Show struct {
+	ID            int64  `json:"id"`
+	Title         string `json:"title"`
+	Description   string `json:"description"`
+	Available     bool   `json:"available"`
+	Fans          int    `json:"fans"`
+	Link          string `json:"link"`
+	Picture       string `json:"picture"`
+	PictureSmall  string `json:"picture_small"`
+	PictureMedium string `json:"picture_medium"`
+	PictureBig    string `json:"picture_big"`
+	PictureXL     string `json:"picture_xl"`
+	Type          string `json:"type"`
+}
+
+type Episode struct {
+	ID            int64  `json:"id"`
+	Title         string `json:"title"`
+	Description   string `json:"description"`
+	Available     bool   `json:"available"`
+	Link          string `json:"link"`
+	Duration      int    `json:"duration"`
+	ReleaseDate   string `json:"release_date"`
+	Picture       string `json:"picture"`
+	PictureSmall  string `json:"picture_small"`
+	PictureMedium string `json:"picture_medium"`
+	PictureBig    string `json:"picture_big"`
+	PictureXL     string `json:"picture_xl"`
+	Show          Show   `json:"show"`
+	Type          string `json:"type"`
+}
+
+type ShowSearchResult struct {
+	Data  []Show `json:"data"`
+	Total int    `json:"total"`
+	Next  string `json:"next"`
+}
+
+type EpisodeSearchResult struct {
+	Data  []Episode `json:"data"`
+	Total int       `json:"total"`
+	Next  string    `json:"next"`
+}
+
+type EpisodesResult struct {
+	Data  []Episode `json:"data"`
+	Total int       `json:"total"`
+	Next  string    `json:"next"`
 }
 
 func (t Track) GetID() int64 {
@@ -183,4 +233,39 @@ func (p Playlist) GetCreatorName() string {
 		return p.Creator.Name
 	}
 	return ""
+}
+
+func (s Show) GetID() int64 {
+	return s.ID
+}
+
+func (s Show) GetTitle() string {
+	return s.Title
+}
+
+func (s Show) GetDescription() string {
+	return s.Description
+}
+
+func (e Episode) GetID() int64 {
+	return e.ID
+}
+
+func (e Episode) GetTitle() string {
+	return e.Title
+}
+
+func (e Episode) GetShowTitle() string {
+	return e.Show.Title
+}
+
+func (e Episode) GetDurationFormatted() string {
+	duration := time.Duration(e.Duration) * time.Second
+	minutes := int(duration.Minutes())
+	seconds := int(duration.Seconds()) % 60
+	return fmt.Sprintf("%d:%02d", minutes, seconds)
+}
+
+func (e Episode) GetDescription() string {
+	return e.Description
 }

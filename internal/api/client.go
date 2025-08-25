@@ -38,24 +38,24 @@ func NewClientWithCache(cacheEnabled bool, ttl time.Duration) *Client {
 		baseURL:     BaseURL,
 		rateLimiter: time.NewTicker(50 * time.Millisecond),
 	}
-	
+
 	if cacheEnabled {
 		client.cache = cache.New(ttl, ttl*2)
 	}
-	
+
 	return client
 }
 
 func (c *Client) get(endpoint string, params url.Values) ([]byte, error) {
 	cacheKey := fmt.Sprintf("%s?%s", endpoint, params.Encode())
-	
+
 	if c.cache != nil {
 		var cachedData []byte
 		if c.cache.Get(cacheKey, &cachedData) {
 			return cachedData, nil
 		}
 	}
-	
+
 	<-c.rateLimiter.C
 
 	fullURL := fmt.Sprintf("%s%s", c.baseURL, endpoint)
@@ -85,7 +85,7 @@ func (c *Client) get(endpoint string, params url.Values) ([]byte, error) {
 			Code    int    `json:"code"`
 		} `json:"error"`
 	}
-	
+
 	if err := json.Unmarshal(body, &errorCheck); err == nil && errorCheck.Error != nil {
 		return nil, fmt.Errorf("API error: %s", errorCheck.Error.Message)
 	}
@@ -189,6 +189,67 @@ func (c *Client) SearchPlaylists(query string, limit int, index int) (*PlaylistS
 	return &result, nil
 }
 
+func (c *Client) SearchShows(query string, limit int, index int) (*ShowSearchResult, error) {
+	params := url.Values{}
+	params.Set("q", query)
+	if limit > 0 {
+		params.Set("limit", fmt.Sprintf("%d", limit))
+	}
+	if index > 0 {
+		params.Set("index", fmt.Sprintf("%d", index))
+	}
+
+	data, err := c.get("/search/podcast", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var result ShowSearchResult
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	return &result, nil
+}
+
+func (c *Client) SearchEpisodes(query string, limit int, index int) (*EpisodeSearchResult, error) {
+	// Search for shows matching the query
+	shows, err := c.SearchShows(query, 10, index)
+	if err != nil {
+		return nil, err
+	}
+
+	var allEpisodes []Episode
+	episodeCount := 0
+
+	// Get episodes from each matching show
+	for _, show := range shows.Data {
+		if limit > 0 && episodeCount >= limit {
+			break
+		}
+
+		episodes, err := c.GetShowEpisodes(show.ID, limit)
+		if err != nil {
+			continue // Skip shows that fail to load episodes
+		}
+
+		// Add episodes from this show
+		for _, episode := range episodes.Data {
+			if limit > 0 && episodeCount >= limit {
+				break
+			}
+			allEpisodes = append(allEpisodes, episode)
+			episodeCount++
+		}
+	}
+
+	return &EpisodeSearchResult{
+		Data:  allEpisodes,
+		Total: len(allEpisodes),
+		Next:  "",
+	}, nil
+}
+
 func (c *Client) GetTrack(id int64) (*Track, error) {
 	endpoint := fmt.Sprintf("/track/%d", id)
 	data, err := c.get(endpoint, nil)
@@ -247,6 +308,36 @@ func (c *Client) GetPlaylist(id int64) (*Playlist, error) {
 	}
 
 	return &playlist, nil
+}
+
+func (c *Client) GetShow(id int64) (*Show, error) {
+	endpoint := fmt.Sprintf("/podcast/%d", id)
+	data, err := c.get(endpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var show Show
+	if err := json.Unmarshal(data, &show); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	return &show, nil
+}
+
+func (c *Client) GetEpisode(id int64) (*Episode, error) {
+	endpoint := fmt.Sprintf("/episode/%d", id)
+	data, err := c.get(endpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var episode Episode
+	if err := json.Unmarshal(data, &episode); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	return &episode, nil
 }
 
 func (c *Client) GetAlbumTracks(id int64, limit int) (*TracksResult, error) {
@@ -309,6 +400,26 @@ func (c *Client) GetArtistTopTracks(id int64, limit int) (*TracksResult, error) 
 	return &result, nil
 }
 
+func (c *Client) GetShowEpisodes(id int64, limit int) (*EpisodesResult, error) {
+	endpoint := fmt.Sprintf("/podcast/%d/episodes", id)
+	params := url.Values{}
+	if limit > 0 {
+		params.Set("limit", fmt.Sprintf("%d", limit))
+	}
+
+	data, err := c.get(endpoint, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var result EpisodesResult
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	return &result, nil
+}
+
 func FilterByArtist(tracks []Track, artistName string) []Track {
 	if artistName == "" {
 		return tracks
@@ -316,13 +427,13 @@ func FilterByArtist(tracks []Track, artistName string) []Track {
 
 	var filtered []Track
 	lowerArtist := strings.ToLower(artistName)
-	
+
 	for _, track := range tracks {
 		if strings.ToLower(track.Artist.Name) == lowerArtist {
 			filtered = append(filtered, track)
 		}
 	}
-	
+
 	return filtered
 }
 
@@ -333,12 +444,29 @@ func FilterAlbumsByArtist(albums []Album, artistName string) []Album {
 
 	var filtered []Album
 	lowerArtist := strings.ToLower(artistName)
-	
+
 	for _, album := range albums {
 		if strings.ToLower(album.Artist.Name) == lowerArtist {
 			filtered = append(filtered, album)
 		}
 	}
-	
+
+	return filtered
+}
+
+func FilterEpisodesByShow(episodes []Episode, showName string) []Episode {
+	if showName == "" {
+		return episodes
+	}
+
+	var filtered []Episode
+	lowerShow := strings.ToLower(showName)
+
+	for _, episode := range episodes {
+		if strings.ToLower(episode.Show.Title) == lowerShow {
+			filtered = append(filtered, episode)
+		}
+	}
+
 	return filtered
 }

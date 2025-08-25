@@ -19,15 +19,17 @@ var (
 
 var searchCmd = &cobra.Command{
 	Use:   "search [query]",
-	Short: "Search for tracks, albums, artists, or playlists",
-	Long: `Search the Deezer catalog for music content.
+	Short: "Search for tracks, albums, artists, playlists, shows, or episodes",
+	Long: `Search the Deezer catalog for music and podcast content.
 	
 Examples:
   deezer-cli search "daft punk" --type track
   deezer-cli search "random access memories" --type album --limit 5
   deezer-cli search "get lucky" --artist "daft punk" --exact
   deezer-cli search "chill" --type playlist --output json
-  deezer-cli search "madonna" --type artist --ids-only`,
+  deezer-cli search "madonna" --type artist --ids-only
+  deezer-cli search "joe rogan" --type show
+  deezer-cli search "startup podcast" --type episode`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		query := args[0]
@@ -43,6 +45,10 @@ Examples:
 			searchArtists(client, query, formatter)
 		case "playlist", "playlists":
 			searchPlaylists(client, query, formatter)
+		case "show", "shows", "podcast", "podcasts":
+			searchShows(client, query, formatter)
+		case "episode", "episodes":
+			searchEpisodes(client, query, formatter)
 		default:
 			searchAll(client, query, formatter)
 		}
@@ -51,7 +57,7 @@ Examples:
 
 func init() {
 	rootCmd.AddCommand(searchCmd)
-	searchCmd.Flags().StringVarP(&searchType, "type", "t", "all", "Type to search: track, album, artist, playlist, all")
+	searchCmd.Flags().StringVarP(&searchType, "type", "t", "all", "Type to search: track, album, artist, playlist, show, episode, all")
 	searchCmd.Flags().StringVar(&artistFilter, "artist", "", "Filter results by artist name (case-insensitive)")
 	searchCmd.Flags().StringVar(&albumFilter, "album", "", "Filter results by album name (case-insensitive)")
 	searchCmd.Flags().BoolVar(&exact, "exact", false, "Use exact matching for filters")
@@ -113,6 +119,26 @@ func searchPlaylists(client *api.Client, query string, formatter *output.Formatt
 	formatter.FormatPlaylists(result.Data)
 }
 
+func searchShows(client *api.Client, query string, formatter *output.Formatter) {
+	result, err := client.SearchShows(query, limit, 0)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error searching shows: %v\n", err)
+		os.Exit(1)
+	}
+
+	formatter.FormatShows(result.Data)
+}
+
+func searchEpisodes(client *api.Client, query string, formatter *output.Formatter) {
+	result, err := client.SearchEpisodes(query, limit, 0)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error searching episodes: %v\n", err)
+		os.Exit(1)
+	}
+
+	formatter.FormatEpisodes(result.Data)
+}
+
 func searchAll(client *api.Client, query string, formatter *output.Formatter) {
 	fmt.Println("=== TRACKS ===")
 	searchTracks(client, query, formatter)
@@ -125,6 +151,12 @@ func searchAll(client *api.Client, query string, formatter *output.Formatter) {
 
 	fmt.Println("\n=== PLAYLISTS ===")
 	searchPlaylists(client, query, formatter)
+
+	fmt.Println("\n=== SHOWS ===")
+	searchShows(client, query, formatter)
+
+	fmt.Println("\n=== EPISODES ===")
+	searchEpisodes(client, query, formatter)
 }
 
 func filterTracksByAlbum(tracks []api.Track, albumName string) []api.Track {

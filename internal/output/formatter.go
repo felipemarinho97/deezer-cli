@@ -112,6 +112,46 @@ func (f *Formatter) FormatPlaylists(playlists []api.Playlist) {
 	}
 }
 
+func (f *Formatter) FormatShows(shows []api.Show) {
+	if len(shows) == 0 {
+		fmt.Println("No shows found")
+		return
+	}
+
+	switch f.format {
+	case "json":
+		f.outputJSON(shows)
+	case "csv":
+		f.outputShowsCSV(shows)
+	case "yaml":
+		f.outputYAML(shows)
+	case "ids":
+		f.outputShowIDs(shows)
+	default:
+		f.outputShowsTable(shows)
+	}
+}
+
+func (f *Formatter) FormatEpisodes(episodes []api.Episode) {
+	if len(episodes) == 0 {
+		fmt.Println("No episodes found")
+		return
+	}
+
+	switch f.format {
+	case "json":
+		f.outputJSON(episodes)
+	case "csv":
+		f.outputEpisodesCSV(episodes)
+	case "yaml":
+		f.outputYAML(episodes)
+	case "ids":
+		f.outputEpisodeIDs(episodes)
+	default:
+		f.outputEpisodesTable(episodes)
+	}
+}
+
 func (f *Formatter) outputTracksTable(tracks []api.Track) {
 	table := tablewriter.NewWriter(os.Stdout)
 	
@@ -248,6 +288,82 @@ func (f *Formatter) outputPlaylistsTable(playlists []api.Playlist) {
 	table.Render()
 }
 
+func (f *Formatter) outputShowsTable(shows []api.Show) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"ID", "Title", "Description", "Available", "Fans", "Link"})
+	table.SetBorder(true)
+	table.SetRowLine(false)
+	table.SetCenterSeparator("│")
+	table.SetColumnSeparator("│")
+	table.SetRowSeparator("─")
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetHeaderColor(
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
+	)
+
+	for _, show := range shows {
+		available := "No"
+		if show.Available {
+			available = "Yes"
+		}
+		
+		table.Append([]string{
+			strconv.FormatInt(show.ID, 10),
+			truncate(show.Title, 30),
+			truncate(show.Description, 40),
+			available,
+			formatNumber(show.Fans),
+			show.Link,
+		})
+	}
+	
+	table.Render()
+}
+
+func (f *Formatter) outputEpisodesTable(episodes []api.Episode) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"ID", "Title", "Show", "Duration", "Release Date", "Available", "Link"})
+	table.SetBorder(true)
+	table.SetRowLine(false)
+	table.SetCenterSeparator("│")
+	table.SetColumnSeparator("│")
+	table.SetRowSeparator("─")
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetHeaderColor(
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
+		tablewriter.Colors{tablewriter.Bold, tablewriter.FgCyanColor},
+	)
+
+	for _, episode := range episodes {
+		available := "No"
+		if episode.Available {
+			available = "Yes"
+		}
+		
+		table.Append([]string{
+			strconv.FormatInt(episode.ID, 10),
+			truncate(episode.Title, 30),
+			truncate(episode.Show.Title, 20),
+			episode.GetDurationFormatted(),
+			episode.ReleaseDate,
+			available,
+			episode.Link,
+		})
+	}
+	
+	table.Render()
+}
+
 func (f *Formatter) outputJSON(data interface{}) {
 	encoder := json.NewEncoder(os.Stdout)
 	encoder.SetIndent("", "  ")
@@ -332,6 +448,43 @@ func (f *Formatter) outputPlaylistsCSV(playlists []api.Playlist) {
 	}
 }
 
+func (f *Formatter) outputShowsCSV(shows []api.Show) {
+	writer := csv.NewWriter(os.Stdout)
+	defer writer.Flush()
+
+	writer.Write([]string{"ID", "Title", "Description", "Available", "Fans", "Link"})
+	
+	for _, show := range shows {
+		writer.Write([]string{
+			strconv.FormatInt(show.ID, 10),
+			show.Title,
+			show.Description,
+			strconv.FormatBool(show.Available),
+			strconv.Itoa(show.Fans),
+			show.Link,
+		})
+	}
+}
+
+func (f *Formatter) outputEpisodesCSV(episodes []api.Episode) {
+	writer := csv.NewWriter(os.Stdout)
+	defer writer.Flush()
+
+	writer.Write([]string{"ID", "Title", "Show", "Duration", "ReleaseDate", "Available", "Link"})
+	
+	for _, episode := range episodes {
+		writer.Write([]string{
+			strconv.FormatInt(episode.ID, 10),
+			episode.Title,
+			episode.Show.Title,
+			episode.GetDurationFormatted(),
+			episode.ReleaseDate,
+			strconv.FormatBool(episode.Available),
+			episode.Link,
+		})
+	}
+}
+
 func (f *Formatter) outputTrackIDs(tracks []api.Track) {
 	for _, track := range tracks {
 		fmt.Println(track.ID)
@@ -353,6 +506,18 @@ func (f *Formatter) outputArtistIDs(artists []api.Artist) {
 func (f *Formatter) outputPlaylistIDs(playlists []api.Playlist) {
 	for _, playlist := range playlists {
 		fmt.Println(playlist.ID)
+	}
+}
+
+func (f *Formatter) outputShowIDs(shows []api.Show) {
+	for _, show := range shows {
+		fmt.Println(show.ID)
+	}
+}
+
+func (f *Formatter) outputEpisodeIDs(episodes []api.Episode) {
+	for _, episode := range episodes {
+		fmt.Println(episode.ID)
 	}
 }
 
@@ -460,6 +625,42 @@ func (f *Formatter) FormatPlaylist(playlist *api.Playlist) {
 		fmt.Println(playlist.ID)
 	default:
 		f.outputPlaylistDetail(playlist)
+	}
+}
+
+func (f *Formatter) FormatShow(show *api.Show) {
+	if show == nil {
+		fmt.Println("Show not found")
+		return
+	}
+
+	switch f.format {
+	case "json":
+		f.outputJSON(show)
+	case "yaml":
+		f.outputYAML(show)
+	case "ids":
+		fmt.Println(show.ID)
+	default:
+		f.outputShowDetail(show)
+	}
+}
+
+func (f *Formatter) FormatEpisode(episode *api.Episode) {
+	if episode == nil {
+		fmt.Println("Episode not found")
+		return
+	}
+
+	switch f.format {
+	case "json":
+		f.outputJSON(episode)
+	case "yaml":
+		f.outputYAML(episode)
+	case "ids":
+		fmt.Println(episode.ID)
+	default:
+		f.outputEpisodeDetail(episode)
 	}
 }
 
@@ -609,4 +810,68 @@ func (f *Formatter) outputPlaylistDetail(playlist *api.Playlist) {
 	
 	magenta.Print("Link: ")
 	fmt.Println(playlist.Link)
+}
+
+func (f *Formatter) outputShowDetail(show *api.Show) {
+	bold := color.New(color.Bold)
+	magenta := color.New(color.FgMagenta)
+	
+	bold.Println("Show Details")
+	fmt.Println(strings.Repeat("─", 50))
+	
+	magenta.Print("ID: ")
+	fmt.Println(show.ID)
+	
+	magenta.Print("Title: ")
+	fmt.Println(show.Title)
+	
+	magenta.Print("Description: ")
+	fmt.Println(show.Description)
+	
+	magenta.Print("Available: ")
+	fmt.Println(show.Available)
+	
+	magenta.Print("Fans: ")
+	fmt.Println(formatNumber(show.Fans))
+	
+	magenta.Print("Picture: ")
+	fmt.Println(show.PictureBig)
+	
+	magenta.Print("Link: ")
+	fmt.Println(show.Link)
+}
+
+func (f *Formatter) outputEpisodeDetail(episode *api.Episode) {
+	bold := color.New(color.Bold)
+	magenta := color.New(color.FgMagenta)
+	
+	bold.Println("Episode Details")
+	fmt.Println(strings.Repeat("─", 50))
+	
+	magenta.Print("ID: ")
+	fmt.Println(episode.ID)
+	
+	magenta.Print("Title: ")
+	fmt.Println(episode.Title)
+	
+	magenta.Print("Show: ")
+	fmt.Printf("%s (ID: %d)\n", episode.Show.Title, episode.Show.ID)
+	
+	magenta.Print("Description: ")
+	fmt.Println(episode.Description)
+	
+	magenta.Print("Duration: ")
+	fmt.Println(episode.GetDurationFormatted())
+	
+	magenta.Print("Release Date: ")
+	fmt.Println(episode.ReleaseDate)
+	
+	magenta.Print("Available: ")
+	fmt.Println(episode.Available)
+	
+	magenta.Print("Picture: ")
+	fmt.Println(episode.PictureBig)
+	
+	magenta.Print("Link: ")
+	fmt.Println(episode.Link)
 }
